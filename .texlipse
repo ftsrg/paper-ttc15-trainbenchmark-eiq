@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Sat Mar 07 22:07:16 CET 2015
+markTmpDer=true
+builderNum=2
+outputDir=pdf
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=ttc15-trainbenchmark-eiq.tex
+outputFile=ttc15-trainbenchmark-eiq.pdf
+langSpell=en
+markDer=true
+srcDir=src

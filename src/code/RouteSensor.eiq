@@ -1,0 +1,12 @@
+pattern routeSensor(route, sensor, switchPosition, sw)
+{
+	Route.follows(route, switchPosition);
+	SwitchPosition.^switch(switchPosition, sw);
+	TrackElement.sensor(sw, sensor);
+	neg find definedBy(route, sensor);	
+}
+
+pattern definedBy(route, sensor)
+{
+	Route.definedBy(route, sensor);
+}

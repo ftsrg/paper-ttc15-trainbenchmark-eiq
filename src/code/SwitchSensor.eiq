@@ -1,0 +1,10 @@
+pattern switchSensor(sw)
+{
+	Switch(sw);
+	neg find hasSensor(sw);	
+}
+
+pattern hasSensor(sw)
+{
+	TrackElement.sensor(sw, _);
+}
