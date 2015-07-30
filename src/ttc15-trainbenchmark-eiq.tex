@@ -26,7 +26,7 @@ This paper presents a solution for the \tb Case of the 2015 Transformation Tool 
 
 \section{Introduction}
 
-This paper describes a solution for the TTC 2015 \tb Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/trainbenchmark-ttc/tree/localsearch} (note that the solution is on the \textsf{localsearch} branch).} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=ArchLinux64_TrainBenchmark-EIQ.vdi}}
+This paper describes a solution for the TTC 2015 \tb Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/trainbenchmark-ttc}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=ArchLinux64_TrainBenchmark-EIQ.vdi}}
 
 \section{\eiq}
 
@@ -58,8 +58,6 @@ For each query, \eiq defines a generates a set of utility classes. These classes
 
 The case defines a well-formedness validation scenario set in the domain of railway systems~\cite{ttc-trainbenchmark-case}. The case provides a synthetic instance model generator which is capable of generating models of various sizes. For the solution, we used the metamodel defined in the case description without any modifications or extensions.
 
-%\ttcfig{architecture}{The architecture of the solution}{0.6}
-
 The solution was developed in the Eclipse IDE. For setting up the development environment, please refer to the readme file. The projects are not tied to the Eclipse environment and can be compiled with the Apache Maven~\cite{Maven} build automation tool. This offers a number of benefits, including portability and the possibility of continuous integration. The solution is written in Java~7. The patterns are defined in \iqpl (IQPL)~\cite{iqpl}.
 
 \subsection{Example Query: \textsf{RouteSensor}}
@@ -68,7 +66,16 @@ We describe the implementation of the \textsf{RouteSensor} query in detail. The 
 
 The \textsf{RouteSensor} query looks for sensors that are connected to a switch, but the sensor and the switch are not connected to the same route~(\autoref{fig:pattern-routesensor}).
 
-\ttcpattern{pattern-routesensor}{Pattern of the \textsf{RouteSensor} query}
+
+
+\begin{figure}
+	\centering
+	\ttcsubfig{pattern-routesensor}{Pattern}
+	\ttcsubfig{transformation-routesensor}{Transformation}
+	\caption{Pattern and transformation of the \textsf{RouteSensor} query.}
+\end{figure}
+
+%\ttcpattern{pattern-routesensor}{}
 
 The query in IQPL is listed in~\autoref{lst:RouteSensor.eiq}. The positive conditions are defined by using the appropriate classes and references, while the negative application condition (NAC) is defined as a negative find operation (\texttt{neg find}) for a separate query.
 
@@ -77,7 +84,7 @@ The query in IQPL is listed in~\autoref{lst:RouteSensor.eiq}. The positive condi
 During the \textsf{repair} operation, for the selected matches, the missing \textsf{definedBy} edge is inserted by connecting the
 route to the sensor. The Java transformation code implementing the transformation is listed in~\autoref{lst:RouteSensorTransformation.java}. The transformation uses the match object returned by \eiq.
 
-\ttcpattern{transformation-routesensor}{Transformation of the \textsf{RouteSensor} query}
+%\ttcpattern{transformation-routesensor}{Transformation of the \textsf{RouteSensor} query}
 
 \listingjava{RouteSensorTransformation.java}{Transformation of the \textsf{RouteSensor} query}
 
@@ -89,17 +96,13 @@ We use the \textsf{RouteSensor} query to provide an overview of the various quer
 
 The Rete network derived from the \textsf{RouteSensor} query is shown in~\autoref{fig:rete-routesensor}. For the sake of clarity, we simplified the Rete network by removing some implementation-specific details. The evaluation in the Rete network starts with the \emph{input nodes} (\textsf{switch}, \textsf{follows}, \textsf{sensor}, \textsf{definedBy}), these are indexing the model by collecting the appropriate tuples. The \emph{worker nodes} are responsible for performing the relational operations, \emph{join} and \emph{antijoin} in this case. The join nodes have a pair of tuple masks (\eg $\langle 2, 3 \rangle$ and $\langle 0, 1 \rangle$) to determine the attributes used in the join operation. The match set of the pattern is stored in the \emph{production node}.
 
-\ttcfig{rete-routesensor}{The Rete network for the \textsf{RouteSensor} query}{0.9}
-
 \subsubsection{Local Search-Based Evaluation}
 
 The search plan generated for evaluating the \textsf{RouteSensor} query is shown in~\autoref{fig:searchplan-routesensor}. This screenshot is taken from the \emph{Local Search Debugger} view of \eiq. The search plan is presented in the upper left part, while the found matches with the variable substitutions are shown below the search plan in a table viewer. The Zest-based graph viewer in the right visualises a match based on the selection of the table viewer.
 
-\ttcfig{searchplan-routesensor}{The search plan and the matches for the \textsf{RouteSensor} query}{0.7}
-
 \section{Evaluation}
 
-In this section, we present the benchmark environment and evaluate the results. The detailed results are shown in~\autoref{detailed-benchmark-results} (\autoref{tab:first-validation-poslength}--\autoref{tab:revalidation-switchset}).
+In this section, we present the benchmark environment and evaluate the results. %The detailed results are shown in~\autoref{detailed-benchmark-results} (\autoref{tab:first-validation-poslength}--\autoref{tab:revalidation-switchset}).
 
 \subsection{Benchmark Environment}
 
@@ -111,35 +114,17 @@ The benchmarks were performed on a 64-bit Ubuntu Server 14.04 virtual machine de
 To present the results, we use the reporting framework of the \tb. The framework generates plots to visualise the execution time of the phases defined in the benchmark. %\footnote{The framework is also capable to visualise the memory consumption of the provided solutions. However, it is difficult to measure the memory consumption of applications running in the JVM.}
 The plots showing each query are included in~\autoref{detailed-benchmark-results}. On each plot, the $x$ axis shows the problem size, \ie the size of the instance model, while the $y$ axis shows the aggregated execution time of a certain phases, measured in milliseconds. Both axes use logarithmic scale.
 
-\begin{figure}
-	\centering
-	\ttcsubfig{fixed-RouteSensor-GroupBy-Tool-time-batch-validation}{Fixed change set}
-	\ttcsubfig{proportional-RouteSensor-GroupBy-Tool-time-batch-validation}{Proportional change set}
-	\caption{First validation times for the \textsf{RouteSensor} query.}
-	\label{fig:RouteSensor-batch-validation}
-\end{figure}
-
 \subsubsection{Benchmark Results for the \textsf{RouteSensor} Query}
 
 For the sake of conciseness, we only discuss the results for the \textsf{RouteSensor} query in detail. 
 
 The results for the \emph{batch validation} are shown in~\autoref{fig:RouteSensor-batch-validation}. The results that---given enough memory---both the incremental and the local search-based (LS) strategies are able to run the query and the transformation for the largest model. The \emph{first validation} takes consistently longer for the incremental strategy as for the LS strategy. This is caused by the fact that the incremental strategy builds the Rete algorithm during the \textsf{read} phase. However, the difference is small as the \emph{first validation} time largely consists of deserializing the EMF model.
 
-\begin{figure}
-	\centering
-	\ttcsubfig{fixed-RouteSensor-GroupBy-Tool-time-revalidation}{Fixed change set}
-	\ttcsubfig{proportional-RouteSensor-GroupBy-Tool-time-revalidation}{Proportional change set}
-	\caption{Revalidation times for the \textsf{RouteSensor} query.}
-	\label{fig:RouteSensor-revalidation}
-\end{figure}
-
 The execution times of the \emph{revalidation} are shown in~\autoref{fig:RouteSensor-revalidation}. The execution time of the incremental strategy linearly correlates with the size of the change set. This implies that for a \emph{fixed} change set, the incremental strategy is able to perform the transformation in constant time, while execution time for the LS strategy correlates with the model size. For the \emph{proportional} change set, the revalidation time is a low-degree polynomial of the model size for both strategies, however, it is an order of magnitude faster for the incremental strategy than for the LS.
 
 \subsection{Comparison of the Query Evaluation Strategies}
 
-\autoref{detailed-benchmark-results} shows the detailed results for all queries and both evaluation strategies.
-
-In the \emph{first validation} (\autoref{fig:incremental-first-validation} and \autoref{fig:localsearch-first-validation}), the evaluation strategies show similar performance characteristics as both have to compute the complete result set of the query. The execution times for both strategies show that the most complex query is \textsf{SemaphoreNeighbor}, while the simplest one is \textsf{SwitchSensor}. 
+\autoref{detailed-benchmark-results} shows the detailed results for all queries and both evaluation strategies. In the \emph{first validation} (\autoref{fig:incremental-first-validation} and \autoref{fig:localsearch-first-validation}), the evaluation strategies show similar performance characteristics as both have to compute the complete result set of the query. The execution times for both strategies show that the most complex query is \textsf{SemaphoreNeighbor}, while the simplest one is \textsf{SwitchSensor}. 
 
 As expected, the execution times of the \emph{revalidation} are different for the two strategies. \autoref{fig:incremental-revalidation} shows that for the incremental strategy the execution time correlates with the size of the match set (instead of the model size). This can be observed when comparing the execution times for the \emph{fixed} and the \emph{proportional} change sets. \autoref{fig:localsearch-revalidation} shows that the execution time for the LS strategy is determined by the model size and is not affected by the size of the change set.
 
@@ -195,8 +180,26 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 
 \listingjava{SwitchSetTransformation.java}{Transformation of the \textsf{SwitchSet} query}
 
+\FloatBarrier
+
 \subsection{Detailed Benchmark Results}
 \label{detailed-benchmark-results}
+
+\begin{figure}
+	\centering
+	\ttcsubfig{fixed-RouteSensor-GroupBy-Tool-time-batch-validation}{Fixed change set}
+	\ttcsubfig{proportional-RouteSensor-GroupBy-Tool-time-batch-validation}{Proportional change set}
+	\caption{First validation times for the \textsf{RouteSensor} query.}
+	\label{fig:RouteSensor-batch-validation}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\ttcsubfig{fixed-RouteSensor-GroupBy-Tool-time-revalidation}{Fixed change set}
+	\ttcsubfig{proportional-RouteSensor-GroupBy-Tool-time-revalidation}{Proportional change set}
+	\caption{Revalidation times for the \textsf{RouteSensor} query.}
+	\label{fig:RouteSensor-revalidation}
+\end{figure}
 
 \begin{figure}[htb]
 	\centering
@@ -230,21 +233,34 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 	\label{fig:localsearch-revalidation}
 \end{figure}
 
+% tables with the benchmark results
+
+%\FloatBarrier
+
+%\input{first-validation-poslength}
+%\input{revalidation-poslength}
+
+%\input{first-validation-routesensor}
+%\input{revalidation-routesensor}
+
+%\input{first-validation-semaphoreneighbor}
+%\input{revalidation-semaphoreneighbor}
+
+%\input{first-validation-switchsensor}
+%\input{revalidation-switchsensor}
+
+%\input{first-validation-switchset}
+%\input{revalidation-switchset}
+
 \FloatBarrier
 
-\input{first-validation-poslength}
-\input{revalidation-poslength}
+\subsection{Rete Network}
 
-\input{first-validation-routesensor}
-\input{revalidation-routesensor}
+\ttcfig{rete-routesensor-layout}{The Rete network for the \textsf{RouteSensor} query}{0.9}
 
-\input{first-validation-semaphoreneighbor}
-\input{revalidation-semaphoreneighbor}
 
-\input{first-validation-switchsensor}
-\input{revalidation-switchsensor}
+\subsection{Local Search Plan}
 
-\input{first-validation-switchset}
-\input{revalidation-switchset}
+\ttcfig{searchplan-routesensor}{The search plan and the matches for the \textsf{RouteSensor} query}{0.7}
 
 \end{document}
