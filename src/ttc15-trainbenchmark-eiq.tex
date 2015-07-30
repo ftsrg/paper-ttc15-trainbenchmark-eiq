@@ -3,6 +3,15 @@
 
 \input{ttc15-commands}
 \usepackage{placeins}
+\usepackage{wrapfig}
+
+\newcommand{\ttctransformation}[2]{
+	\begin{wrapfigure}{r}{7cm}
+		\centering
+		\includegraphics[scale=0.22]{figures/transformation-#1}
+		\vspace{-3em}
+	\end{wrapfigure}
+}
 
 % metadata
 \title{\tb Case: an \eiq Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project and Red Hat Inc.}}
@@ -42,7 +51,8 @@ The incremental pattern matcher provides quick reevaluation for complex queries.
 
 \emph{Local search-based pattern matching}~(LS) is commonly used in graph transformation tools~\cite{FUJABA,GrGen}. Along the incremental query engine, \eiq also provides a local search-based pattern matcher. 
 
-The matching process consists of four steps. ($1$) At first, in a preprocessing step the patterns are \emph{normalized}: the constraint set is minimized, variables that are always equal are unified and positive pattern calls are flattened. These normalized patterns are evaluated by ($2$) the \emph{query planner}, using a specified cost estimation function to provide search plans~\cite{varro:adaptivesearch}: totally ordered lists of search operations used to ensure that the constraints from the pattern definition hold. From a single pattern specification multiple search plans can be derived, thus pattern matching includes ($3$) \emph{plan selection} based on the input parameter binding and model-specific metrics. Finally, ($4$) \emph{the search plan is executed} by a plan interpreter evaluating the different operations of the plans. If an operation fails, the interpreter backtracks; if all operations are executed successfully, a match is found.
+The matching process consists of four steps. ($1$) At first, in a preprocessing step the patterns are \emph{normalized}: the constraint set is minimized, variables that are always equal are unified and positive pattern calls are flattened. These normalized patterns are evaluated by ($2$) the \emph{query planner}, using a specified cost estimation function to provide search plans: %~\cite{varro:adaptivesearch}: 
+totally ordered lists of search operations used to ensure that the constraints from the pattern definition hold. From a single pattern specification multiple search plans can be derived, thus pattern matching includes ($3$) \emph{plan selection} based on the input parameter binding and model-specific metrics. Finally, ($4$) \emph{the search plan is executed} by a plan interpreter evaluating the different operations of the plans. If an operation fails, the interpreter backtracks; if all operations are executed successfully, a match is found.
 
 Compared to the incremental query engine, the search-based algorithm requires less memory~\cite{IST15} and is therefore capable of evaluating performing queries on larger models if there is not enough memory available for the incremental engine.
 
@@ -64,20 +74,16 @@ The solution was developed in the Eclipse IDE. For setting up the development en
 
 We describe the implementation of the \textsf{RouteSensor} query in detail. The other queries and transformations are implemented in a similar manner. The code of patterns and the transformation definitions are listed in~\autoref{patterns}.
 
-The \textsf{RouteSensor} query looks for sensors that are connected to a switch, but the sensor and the switch are not connected to the same route~(\autoref{fig:pattern-routesensor}).
+\ttctransformation{routesensor}
 
+The \textsf{RouteSensor} query looks for sensors that are connected to a switch, but the sensor and the switch are not connected to the same route. The query in IQPL is listed in~\autoref{lst:RouteSensor.eiq}. The positive conditions are defined by using the appropriate classes and references, while the negative application condition (NAC) is defined as a negative find operation (\texttt{neg find}) for a separate query.
 
-
-\begin{figure}
-	\centering
-	\ttcsubfig{pattern-routesensor}{Pattern}
-	\ttcsubfig{transformation-routesensor}{Transformation}
-	\caption{Pattern and transformation of the \textsf{RouteSensor} query.}
-\end{figure}
-
-%\ttcpattern{pattern-routesensor}{}
-
-The query in IQPL is listed in~\autoref{lst:RouteSensor.eiq}. The positive conditions are defined by using the appropriate classes and references, while the negative application condition (NAC) is defined as a negative find operation (\texttt{neg find}) for a separate query.
+%\begin{figure}
+%	\centering
+%	\ttcsubfig{pattern-routesensor}{Pattern}
+%	\ttcsubfig{transformation-routesensor}{Transformation}
+%	\caption{Pattern and transformation of the \textsf{RouteSensor} query.}
+%\end{figure}
 
 \listingiqpl{RouteSensor.eiq}{Pattern of the \textsf{RouteSensor} query}
 
@@ -94,7 +100,7 @@ We use the \textsf{RouteSensor} query to provide an overview of the various quer
 
 \subsubsection{Incremental Evaluation}
 
-The Rete network derived from the \textsf{RouteSensor} query is shown in~\autoref{fig:rete-routesensor}. For the sake of clarity, we simplified the Rete network by removing some implementation-specific details. The evaluation in the Rete network starts with the \emph{input nodes} (\textsf{switch}, \textsf{follows}, \textsf{sensor}, \textsf{definedBy}), these are indexing the model by collecting the appropriate tuples. The \emph{worker nodes} are responsible for performing the relational operations, \emph{join} and \emph{antijoin} in this case. The join nodes have a pair of tuple masks (\eg $\langle 2, 3 \rangle$ and $\langle 0, 1 \rangle$) to determine the attributes used in the join operation. The match set of the pattern is stored in the \emph{production node}.
+The Rete network derived from the \textsf{RouteSensor} query is shown in~\autoref{fig:rete-routesensor-layout}. For the sake of clarity, we simplified the Rete network by removing some implementation-specific details. The evaluation in the Rete network starts with the \emph{input nodes} (\textsf{switch}, \textsf{follows}, \textsf{sensor}, \textsf{definedBy}), these are indexing the model by collecting the appropriate tuples. The \emph{worker nodes} are responsible for performing the relational operations, \emph{join} and \emph{antijoin} in this case. The join nodes have a pair of tuple masks (\eg $\langle 2, 3 \rangle$ and $\langle 0, 1 \rangle$) to determine the attributes used in the join operation. The match set of the pattern is stored in the \emph{production node}.
 
 \subsubsection{Local Search-Based Evaluation}
 
@@ -133,7 +139,7 @@ These results imply that the optimal evaluation strategy depends on the specific
 \section{Summary and Future Work}
 \label{summary}
 
-The paper presented a solution for the \tb case of the 2015 Transformation Tool Contest. The solution covers both the basic and the extension tasks.
+The paper presented a solution for the \tb case of the 2015 Transformation Tool Contest. 
 
 There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. This will allow the user to use annotations on the patterns for specifying the desired query evaluation strategy. There are also plans to develop an adaptive query engine which will use query optimisation heuristics to determine the appropriate strategy based on the query, the model and the available resources.
 
@@ -156,11 +162,11 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 
 \listingjava{PosLengthTransformation.java}{Transformation of the \textsf{PosLength} query}
 
-\subsubsection{\textsf{RouteSensor}}
+%\subsubsection{\textsf{RouteSensor}}
 
-\listingiqpl{RouteSensor.eiq}{Pattern of the \textsf{RouteSensor} query}
+%\listingiqpl{RouteSensor.eiq}{Pattern of the \textsf{RouteSensor} query}
 
-\listingjava{RouteSensorTransformation.java}{Transformation of the \textsf{RouteSensor} query}
+%\listingjava{RouteSensorTransformation.java}{Transformation of the \textsf{RouteSensor} query}
 
 \subsubsection{\textsf{SemaphoreNeighbor}}
 
@@ -180,12 +186,12 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 
 \listingjava{SwitchSetTransformation.java}{Transformation of the \textsf{SwitchSet} query}
 
-\FloatBarrier
+\clearpage
 
 \subsection{Detailed Benchmark Results}
 \label{detailed-benchmark-results}
 
-\begin{figure}
+\begin{figure}[h!]
 	\centering
 	\ttcsubfig{fixed-RouteSensor-GroupBy-Tool-time-batch-validation}{Fixed change set}
 	\ttcsubfig{proportional-RouteSensor-GroupBy-Tool-time-batch-validation}{Proportional change set}
@@ -193,7 +199,7 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 	\label{fig:RouteSensor-batch-validation}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h!]
 	\centering
 	\ttcsubfig{fixed-RouteSensor-GroupBy-Tool-time-revalidation}{Fixed change set}
 	\ttcsubfig{proportional-RouteSensor-GroupBy-Tool-time-revalidation}{Proportional change set}
@@ -201,7 +207,7 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 	\label{fig:RouteSensor-revalidation}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[h!]
 	\centering
 	\ttcsubfig{fixed-EMFIncQuery-Incremental-GroupBy-Query-time-batch-validation}{Fixed change set}
 	\ttcsubfig{proportional-EMFIncQuery-Incremental-GroupBy-Query-time-batch-validation}{Proportional change set}
@@ -209,7 +215,7 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 	\label{fig:incremental-first-validation}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[h!]
 	\centering
 	\ttcsubfig{fixed-EMFIncQuery-Incremental-GroupBy-Query-time-revalidation}{Fixed change set}
 	\ttcsubfig{proportional-EMFIncQuery-Incremental-GroupBy-Query-time-revalidation}{Proportional change set}
@@ -217,7 +223,7 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 	\label{fig:incremental-revalidation}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[h!]
 	\centering
 	\ttcsubfig{fixed-EMFIncQuery-LocalSearch-GroupBy-Query-time-batch-validation}{Fixed change set}
 	\ttcsubfig{proportional-EMFIncQuery-LocalSearch-GroupBy-Query-time-batch-validation}{Proportional change set}
@@ -225,7 +231,7 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 	\label{fig:localsearch-first-validation}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[h!]
 	\centering
 	\ttcsubfig{fixed-EMFIncQuery-LocalSearch-GroupBy-Query-time-revalidation}{Fixed change set}
 	\ttcsubfig{proportional-EMFIncQuery-LocalSearch-GroupBy-Query-time-revalidation}{Proportional change set}
@@ -252,15 +258,16 @@ There is ongoing work to develop a hybrid query engine~\cite{STTT10} for \eiq. T
 %\input{first-validation-switchset}
 %\input{revalidation-switchset}
 
-\FloatBarrier
+\clearpage
 
 \subsection{Rete Network}
 
-\ttcfig{rete-routesensor-layout}{The Rete network for the \textsf{RouteSensor} query}{0.9}
+\ttcfig{rete-routesensor-layout}{The Rete network for the \textsf{RouteSensor} query}{0.7}
 
+\FloatBarrier
 
 \subsection{Local Search Plan}
 
-\ttcfig{searchplan-routesensor}{The search plan and the matches for the \textsf{RouteSensor} query}{0.7}
+\ttcfig{searchplan-routesensor}{The search plan and the matches for the \textsf{RouteSensor} query}{0.6}
 
 \end{document}
