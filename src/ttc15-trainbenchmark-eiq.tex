@@ -6,8 +6,9 @@
 \usepackage{wrapfig}
 
 \newcommand{\ttctransformation}[2]{
-	\begin{wrapfigure}{r}{7cm}
+	\begin{wrapfigure}{l}{7cm}
 		\centering
+		\vspace{-1em}
 		\includegraphics[scale=0.22]{figures/transformation-#1}
 		\vspace{-3em}
 	\end{wrapfigure}
@@ -35,11 +36,11 @@ This paper presents a solution for the \tb Case of the 2015 Transformation Tool 
 
 \section{Introduction}
 
-This paper describes a solution for the TTC 2015 \tb Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/trainbenchmark-ttc}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=ArchLinux64_TrainBenchmark-EIQ.vdi}}
+This paper describes a solution for the TTC 2015 \tb Case~\cite{ttc-trainbenchmark-case}. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/trainbenchmark-ttc}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=ArchLinux64_TrainBenchmark-EIQ.vdi}}
 
 \section{\eiq}
 
-Automated model transformations are frequently integrated with modeling environments, requiring both high performance and a concise programming interface to support software engineers. The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models~\cite{iqpl}. \eiq is developed with a focus on \emph{incremental query evaluation}, however, the most recent version is also capable of evaluating queries with a \emph{local search-based} algorithm.
+Automated model transformations are frequently integrated with modeling environments, requiring both high performance and a concise programming interface to support software engineers. The objective of the \eiq~\cite{models2010} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models~\cite{iqpl}. \eiq is developed with a focus on \emph{incremental query evaluation}, however, the most recent version is also capable of evaluating queries with a \emph{local search-based} algorithm.
 
 \subsection{Incremental Pattern Matching}
 
@@ -49,7 +50,7 @@ The incremental pattern matcher provides quick reevaluation for complex queries.
 
 \subsection{Local Search-Based Pattern Matching}
 
-\emph{Local search-based pattern matching}~(LS) is commonly used in graph transformation tools~\cite{FUJABA,GrGen}. Along with the incremental query engine, \eiq also provides a local search-based pattern matcher. 
+\emph{Local search-based pattern matching}~(LS) is commonly used in graph transformation tools. Along with the incremental query engine, \eiq also provides a local search-based pattern matcher. 
 
 The matching process consists of four steps. ($1$) At first, in a preprocessing step the patterns are \emph{normalized}: the constraint set is minimized, variables that are always equal are unified and positive pattern calls are flattened. These normalized patterns are evaluated by ($2$) the \emph{query planner}, using a specified cost estimation function to provide search plans: %~\cite{varro:adaptivesearch}: 
 totally ordered lists of search operations used to ensure that the constraints from the pattern definition hold. From a single pattern specification multiple search plans can be derived, thus pattern matching includes ($3$) \emph{plan selection} based on the input parameter binding and model-specific metrics. Finally, ($4$) \emph{the search plan is executed} by a plan interpreter evaluating the different operations of the plans. If an operation fails, the interpreter backtracks; if all operations are executed successfully, a match is found.
@@ -68,13 +69,18 @@ For each query, \eiq generates a set of utility classes. These classes store the
 
 The case defines a well-formedness validation scenario set in the domain of railway systems~\cite{ttc-trainbenchmark-case}. The case provides a synthetic instance model generator which is capable of generating models of various sizes. For the solution, we used the metamodel defined in the case description without any modifications or extensions.
 
-The solution was developed in the Eclipse IDE. For setting up the development environment, please refer to the readme file. The projects are not tied to the Eclipse environment and can be compiled with the Apache Maven~\cite{Maven} build automation tool. This offers a number of benefits, including portability and the possibility of continuous integration. The solution is written in Java~7. The patterns are defined in \iqpl (IQPL)~\cite{iqpl}.
+The solution was developed in the Eclipse IDE. For setting up the development environment, please refer to the readme file. The projects are not tied to the Eclipse environment and can be compiled with the Apache Maven build automation tool. This offers a number of benefits, including portability and the possibility of continuous integration. The solution is written in Java~7. The patterns are defined in \iqpl (IQPL)~\cite{iqpl}.
 
 \subsection{Example Query: \textsf{RouteSensor}}
 \label{routesensor}
-We describe the implementation of the \textsf{RouteSensor} query in detail. The other queries and transformations are implemented in a similar manner. The implemented application uses the Java classes generated by \eiq and the hand-coded transformation logic introduced below. First it finds the matches of the queries, then the corresponding transformation step is applied for each match. The code of patterns and the transformation definitions are listed in~\autoref{patterns}.
 
 \ttctransformation{routesensor}
+
+We describe the implementation of the \textsf{RouteSensor} query in detail. The other queries and transformations are implemented in a similar manner. The implemented application uses the Java classes generated by \eiq and the hand-coded transformation logic introduced below. First it finds the matches of the queries, then the corresponding transformation step is applied for each match. The code of patterns and the transformation definitions are listed in~\autoref{patterns}.
+
+\begin{wrapfigure}[12]{l}{.52\textwidth}
+	\listingiqpl{RouteSensor.eiq}{Pattern of the \textsf{RouteSensor} query}
+\end{wrapfigure}
 
 The \textsf{RouteSensor} query looks for sensors that are connected to a switch, but the sensor and the switch are not connected to the same route. The query in IQPL is listed in~\autoref{lst:RouteSensor.eiq}. The positive conditions are defined by using the appropriate classes and references, while the negative application condition (NAC) is defined as a negative find operation (\texttt{neg find}) for a separate query.
 
@@ -85,14 +91,18 @@ The \textsf{RouteSensor} query looks for sensors that are connected to a switch,
 %	\caption{Pattern and transformation of the \textsf{RouteSensor} query.}
 %\end{figure}
 
-\listingiqpl{RouteSensor.eiq}{Pattern of the \textsf{RouteSensor} query}
 
 During the \textsf{repair} operation, for the selected matches, the missing \textsf{definedBy} edge is inserted by connecting the
 route to the sensor. The Java transformation code implementing the transformation is listed in~\autoref{lst:RouteSensorTransformation.java}. The transformation uses the match object returned by \eiq.
 
+%\begin{wrapfigure}[8]{l}{.5\textwidth}
+%\end{wrapfigure}
+
+\vspace{0.5em}
+\listingjava{RouteSensorTransformation.java}{Transformation of the \textsf{RouteSensor} query}
+
 %\ttcpattern{transformation-routesensor}{Transformation of the \textsf{RouteSensor} query}
 
-\listingjava{RouteSensorTransformation.java}{Transformation of the \textsf{RouteSensor} query}
 
 \subsection{Query Evaluation Strategies for the \textsf{RouteSensor} Pattern}
 
